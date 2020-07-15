@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        #fbWrap {
+            width: 1000px;
+            height: 600px;
+            background: url("img/bg.jpg");
+            background-size: 100% 100%;
+            position: relative;
+            overflow: hidden;
+            margin: 0 auto;
+        }
+        #head {
+            position: absolute;
+           left: 50%;
+           top: 30%;
+           transform: translateX(-50%);
+        }
+
+        #head span {
+            background: url("img/bird0.png");
+            position: absolute;
+            right: 0;
+            top: 20px;
+            width: 40px;
+            height: 26px;
+            background-size: 100% 100%;
+        }
+        #scoring {
+            position: absolute;
+            left: 50%;
+           top: 10%;
+           transform: translateX(-50%);
+            z-index: 2;
+            font-size: 50px;
+        }
+        #menu {
+            position: absolute;
+            left: 50%;
+            top: 60%;
+            transform: translateX(-50%);
+        }
+        #bird {
+            position: absolute;
+            left: 30px;
+            top: 40%;
+            display: none;
+            z-index: 10;
+        }
+        .die {
+            transition: 0.5s;
+            top: 393px !important;
+            z-index: 99;
+        }
+        #ductWrap li {
+            position: absolute;
+            top: 0;
+            left: 350px;
+            width: 62px;
+            height: 423px;
+            list-style: none;
+
+        }
+        .duct_up {
+            background: url("img/up_mod.png") repeat-y;
+            height: 120px;
+            position: relative;
+        }
+        .duct_up img {
+            position: absolute;
+            bottom: 0;
+        }
+        .duct_down {
+            background: url("img/down_mod.png") repeat-y;
+            height: 203px;
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+        }
+        .duct_down img {
+            position: absolute;
+            top: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="fbWrap">
+        <div id="head" class="animated slideOutUp">
+            <img src="img/head.jpg" alt="">
+            <span></span>
+        </div>
+        <div id="scoring">
+            0
+        </div>
+        <div id="menu">
+            <img id="start" src="img/start.jpg" alt="">
+        </div>
+        <div id="bird">
+            <img src="img/down_bird1.png" alt="">
+        </div>
+        <ul id="ductWrap">
+        </ul>
+    </div>
+    <script>
+        //获取元素
+        var startBtn=document.getElementById('start'); //开始按钮
+        var head=document.getElementById('head')
+         //头部图片
+         var bird = document.getElementById('bird');
+         //小鸟
+         var ductWrap =document.getElementById('ductWarp');//存放管道的div
+         var score =document.getElementById('scoring') //存放分数的div
+         //点击开始事件
+         start.onclick=function(){
+             //隐藏开始按钮和head 
+             start.style.display='none';
+             head.style.display='none';
+             //显示小鸟
+             bird.style.display='block';
+             bird.speed=0; //设置小鸟的速度
+             //设置定时器
+             bird.moveTimer=setInterval(function(){
+                 //让小鸟的移动速度递增
+                 bird.speed+=0.5;
+                 
+             },30)
+         }
+    </script>
+</body>
+
+</html>

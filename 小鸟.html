@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <style type="text/css">
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        #fbWrap {
+            width: 1000px;
+            height: 800px;
+            background: url("img/bg.jpg");
+            background-size: 100% 100%;
+            position: relative;
+            overflow: hidden;
+            margin: 0 auto;
+        }
+        #head {
+            position: absolute;
+            left: 50px;
+            top: 150px;
+        }
+
+        #head span {
+            background: url("img/bird0.png");
+            position: absolute;
+            right: 0;
+            top: 20px;
+            width: 40px;
+            height: 26px;
+            background-size: 100% 100%;
+        }
+        #scoring {
+            position: absolute;
+            left: 50%;
+            top: 40px;
+            z-index: 2;
+            font-size: 50px;
+        }
+        #menu {
+            position: absolute;
+            left: 40%;
+            top: 60%;
+        }
+        #bird {
+            position: absolute;
+            left: 30px;
+            top: 10%;
+            display: none;
+            z-index: 10;
+        }
+        .die {
+            transition: 0.5s;
+            top: 393px !important;
+            z-index: 99;
+        }
+        #ductWrap li {
+            position: absolute;
+            top: 0;
+            left: 350px;
+            width: 62px;
+            height: 423px;
+            list-style: none;
+
+        }
+        .duct_up {
+            background: url("img/up_mod.png") repeat-y;
+            height: 120px;
+            position: relative;
+        }
+        .duct_up img {
+            position: absolute;
+            bottom: 0;
+        }
+        .duct_down {
+            background: url("img/down_mod.png") repeat-y;
+            height: 203px;
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+        }
+        .duct_down img {
+            position: absolute;
+            top: 0;
+        }
+    </style>
+</head>
+<body>
+<div id="fbWrap">
+    <div id="head" class="animated slideOutUp">
+        <img src="img/head.jpg" alt="">
+        <span></span>
+    </div>
+    <div id="scoring">
+        0
+    </div>
+    <div id="menu">
+        <img id="start" src="img/start.jpg" alt="">
+    </div>
+    <div id="bird">
+        <img src="img/down_bird1.png" alt="">
+    </div>
+    <ul id="ductWrap">
+    </ul>
+</div>
+</body>
+<script type="text/javascript">
+    // 开始按钮
+    var startBtn = document.querySelector("#start");
+    // head
+    var head = document.querySelector("#head");
+    // bird
+    var bird = document.querySelector("#bird");
+    // audio
+    var audio = document.querySelector("audio");
+    // 获取存放管道的div
+    var ductWrap = document.querySelector("#ductWrap");
+    // 获取存放分数的div
+    var score = document.querySelector("#scoring");
+    // 创建管道定时器
+    var createDuctTimer = null;
+    // 是否删除管道移动定时器
+    var isDelTimer = false;
+    startBtn.onclick = function () {
+        // 隐藏开始按钮和head
+        this.parentNode.style.display = "none";
+        head.style.display = "none";
+        // 显示小鸟
+        bird.style.display = "block";
+        // 小鸟移动的速度
+        bird.speed = 0;
+        // 小鸟移动
+        bird.moveTimer = setInterval(function () {
+            bird.speed += 0.5;
+            if (bird.offsetTop <= 0) {
+                bird.style.top = "0px";
+            } else if (bird.offsetTop >= 394) {
+                bird.style.top = "394px";
+                clearInterval(bird.moveTimer);
+                document.onmousedown = function (e) {
+                    // 阻止默认事件
+                    var ev = e || window.event;
+                    ev.preventDefault();
+                };
+                // 当小鸟落地死亡时
+                // 1:清除创建管道的定时器
+                clearInterval(createDuctTimer);
+                // 2:清除管道移动的定时器
+                isDelTimer = true;
+            }
+            if (bird.speed <= 0) {
+                bird.children[0].src = "img/up_bird0.png";
+            } else {
+                bird.children[0].src = "img/down_bird0.png";
+            }
+            bird.style.top = bird.offsetTop + bird.speed + "px";
+            // 碰撞检测
+            var ductRow = document.querySelectorAll(".duct_row");
+            for (var i = 0; i < ductRow.length; i++) {
+                var isCrash = crashFn(bird, ductRow[i]);
+                if (isCrash == true) {
+                    // 清除小鸟移动
+                    clearInterval(bird.moveTimer);
+                    // 清除创建管道定时器
+                    clearInterval(createDuctTimer);
+                    // 清除管道移动
+                    isDelTimer = true;
+                    bird.className = "die";
+                    document.onmousedown = function (e) {
+                        var ev = e || window.event;
+                        ev.preventDefault();
+                    };
+                }
+            }
+        }, 30);
+        // 小鸟向上移动
+        document.onmousedown = function (e) {
+            // 阻止默认事件
+            var ev = e || window.event;
+            ev.preventDefault();
+            bird.speed = -5;
+            audio.src = "bullet.mp3";
+        }
+        // 创建管道
+        createDuctTimer = setInterval(function () {
+            var duct = document.createElement("li");
+            // 上管道的随机高度
+            var upHeight = randFn(62, 261);
+            // 下管道的高度
+            var downHeight = 423 - upHeight - 100;
+            duct.innerHTML = '<div class="duct_up duct_row" style="height:' + upHeight + 'px"><img src="img/up_pipe.png"></div><div class="duct_down duct_row" style="height: ' + downHeight + 'px"><img src="img/down_pipe.png"></div>';
+            // 管道第一次出现的位置
+            duct.l = 350;
+            // 给管道添加bol(用来判断是否加分)
+            duct.scoreBol = true;
+            // 管道移动
+            duct.moveTimer = setInterval(function () {
+                duct.l -= 3;
+                duct.style.left = duct.l + "px";
+                if (duct.l <= -62) {
+                    // 清除管道
+                    ductWrap.removeChild(duct);
+                    clearInterval(duct.moveTimer);
+
+                } else if (duct.l <= -31) {//当管道小于-31时，代表小鸟通过
+                    if (duct.scoreBol == true) {
+                        score.innerHTML = parseInt(score.innerHTML) + 10;
+                    }
+                    duct.scoreBol = false;
+                }
+                // 小鸟死亡，定时器移除
+                if (isDelTimer == true) {
+                    clearInterval(duct.moveTimer);
+                }
+
+            }, 30)
+            // 把管道插入到ductWrap
+            ductWrap.appendChild(duct);
+        }, 3000);
+    }
+    // 随机函数
+    function randFn(min, max) {
+        return parseInt(Math.random() * (max - min + 1) + min);
+    }
+    //碰撞检测
+    function crashFn(obj1, obj2) {
+
+        var obj1Left = obj1.offsetLeft;
+        var obj1Right = obj1Left + obj1.offsetWidth;
+        var obj1Top = obj1.offsetTop;
+        var obj1Bottom = obj1Top + obj1.offsetHeight;
+
+        var obj2Left = obj2.parentNode.offsetLeft;
+        var obj2Right = obj2Left + obj2.offsetWidth;
+        var obj2Top = obj2.offsetTop;
+        var obj2Bottom = obj2Top + obj2.offsetHeight;
+        // 1:obj1的右边 大于等于 obj2的左边
+        // 2:obj1的下边 大于等于 obj2的上边
+        // 3:obj1的左边 小于等于 obj2的右边
+        // 4:obj1的上边 小于等于 obj2的下边
+        if (obj1Right >= obj2Left && obj1Bottom >= obj2Top && obj1Left <= obj2Right && obj1Top <= obj2Bottom) {
+            // 已经发生碰撞
+            return true;
+        } else {
+            // 没有碰撞
+            return false;
+        }
+    }
+</script>
+</html>
